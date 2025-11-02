@@ -2,24 +2,95 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TypeApplications #-}
 
 module Main (main) where
 
+import qualified Autodocodec as AC
 import qualified Colog.Core as L
 import Control.Concurrent (forkFinally)
 import qualified Control.Exception as E
 import Control.Monad (forever, void)
 import Control.Monad.IO.Class
+import Data.Aeson ((.=))
+import qualified Data.Aeson as A
 import qualified Data.List.NonEmpty as NE
 import Data.Proxy
+import qualified Data.Sequence as Seq
 import qualified Data.Text as T
 import Language.LSP.Protocol.Message
 import Language.LSP.Protocol.Types
 import Language.LSP.Server
 import Network.Socket
 import Prettyprinter
+import SKGraphSchema
 import System.IO
+
+diagramAcceptMethod :: SMethod (Method_CustomMethod "diagram/accept")
+diagramAcceptMethod = (SMethod_CustomMethod (Proxy @"diagram/accept"))
+
+dummyModel :: A.Value
+dummyModel =
+  A.object
+    [ "clientId" .= T.pack "keith-diagram_sprotty",
+      "action"
+        .= A.object
+          [ "kind" .= T.pack "setModel",
+            "newRoot"
+              .= A.object
+                [ "type" .= T.pack "graph",
+                  "revision" .= (0 :: Int),
+                  "id" .= T.pack "file:///home/klara/git/plyghd-ls-demonstrator/empty.kgt",
+                  "properties" .= (Seq.empty :: Seq.Seq A.Object),
+                  "children"
+                    .= Seq.fromList
+                      [ A.object
+                          [ "data" .= (Seq.empty :: Seq.Seq A.Object),
+                            "type" .= T.pack "node",
+                            "id" .= T.pack "$root",
+                            "properties"
+                              .= A.object
+                                [],
+                            "direction" .= (0 :: Int),
+                            "selected" .= False,
+                            "hoverFeedback" .= False,
+                            "children"
+                              .= Seq.fromList
+                                [ A.object
+                                    [ "data" .= (Seq.empty :: Seq.Seq A.Object),
+                                      "type" .= T.pack "node",
+                                      "id" .= T.pack "$root$Nactor1",
+                                      "properties"
+                                        .= A.object
+                                          [],
+                                      "children"
+                                        .= Seq.fromList
+                                          [ A.object
+                                              [ "data"
+                                                  .= Seq.fromList
+                                                    [ A.object
+                                                        [ "type" .= T.pack "KTextImpl",
+                                                          "text" .= T.pack "actor_1",
+                                                          "styles" .= ((Seq.empty) :: Seq.Seq A.Object),
+                                                          "properties"
+                                                            .= A.object
+                                                              []
+                                                        ]
+                                                    ],
+                                                "properties" .= A.object [],
+                                                "type" .= T.pack "label",
+                                                "id" .= T.pack "$root$Nactor1$$L0",
+                                                "children" .= A.object []
+                                              ]
+                                          ]
+                                    ]
+                                ]
+                          ]
+                      ]
+                ]
+          ]
+    ]
 
 handlers :: Handlers (LspM ())
 handlers =
@@ -51,8 +122,12 @@ handlers =
             ms = mkMarkdown "Hello world"
             range = Range pos pos
         responder (Right $ InL rsp),
-      requestHandler (SMethod_CustomMethod (Proxy @"diagram/accept")) $ \req resp -> do
+      notificationHandler diagramAcceptMethod $ \_not -> do
+        sendNotification diagramAcceptMethod (dummyModel)
+        -- sendNotification diagramAcceptMethod (tests)
         pure ()
+        -- requestHandler (SMethod_CustomMethod (Proxy @"diagram/accept")) $ \req resp -> do
+        --   pure ()
     ]
 
 runServerC :: Handle -> Handle -> ServerDefinition config -> IO Int
