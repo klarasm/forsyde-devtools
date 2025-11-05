@@ -30,13 +30,47 @@ import System.IO
 diagramAcceptMethod :: SMethod (Method_CustomMethod "diagram/accept")
 diagramAcceptMethod = (SMethod_CustomMethod (Proxy @"diagram/accept"))
 
-dummyModel :: A.Value
-dummyModel =
+setPreferencesMethod :: SMethod (Method_CustomMethod "keith/preferences/setPreferences")
+setPreferencesMethod = (SMethod_CustomMethod (Proxy @"keith/preferences/setPreferences"))
+
+setSynthesis :: A.Value
+setSynthesis =
   A.object
-    [ "clientId" .= T.pack "keith-diagram_sprotty",
+    [ "clientId" .= T.pack "sprotty",
       "action"
         .= A.object
-          [ "kind" .= T.pack "setModel",
+          [ "kind" .= T.pack "setSyntheses",
+            "syntheses"
+              .= Seq.fromList
+                [ A.object
+                    [ "id" .= T.pack "se.kth.forsyde-devtools.dummyid",
+                      "displayName" .= T.pack "ForSyDe Shallow"
+                    ]
+                ]
+          ]
+    ]
+
+updateOptions :: A.Value
+updateOptions =
+  A.object
+    [ "clientId" .= T.pack "sprotty",
+      "action"
+        .= A.object
+          [ "kind" .= T.pack "updateOptions",
+            "valuedSynthesisOptions" .= (Seq.empty :: Seq.Seq A.Object),
+            "layoutOptions" .= (Seq.empty :: Seq.Seq A.Object),
+            "actions" .= (Seq.empty :: Seq.Seq A.Object),
+            "modelUri" .= T.pack "file:///home/klara/git/plyghd-ls-demonstrator/empty.kgt"
+          ]
+    ]
+
+requestBounds :: A.Value
+requestBounds =
+  A.object
+    [ "clientId" .= T.pack "sprotty",
+      "action"
+        .= A.object
+          [ "kind" .= T.pack "requestBounds",
             "newRoot"
               .= A.object
                 [ "type" .= T.pack "graph",
@@ -52,38 +86,43 @@ dummyModel =
                             "properties"
                               .= A.object
                                 [],
-                            "direction" .= (0 :: Int),
-                            "selected" .= False,
-                            "hoverFeedback" .= False,
                             "children"
                               .= Seq.fromList
                                 [ A.object
-                                    [ "data" .= (Seq.empty :: Seq.Seq A.Object),
-                                      "type" .= T.pack "node",
-                                      "id" .= T.pack "$root$Nactor1",
-                                      "properties"
-                                        .= A.object
-                                          [],
-                                      "children"
+                                    [ "data"
                                         .= Seq.fromList
                                           [ A.object
-                                              [ "data"
-                                                  .= Seq.fromList
-                                                    [ A.object
-                                                        [ "type" .= T.pack "KTextImpl",
-                                                          "text" .= T.pack "actor_1",
-                                                          "styles" .= ((Seq.empty) :: Seq.Seq A.Object),
-                                                          "properties"
-                                                            .= A.object
-                                                              []
-                                                        ]
-                                                    ],
-                                                "properties" .= A.object [],
-                                                "type" .= T.pack "label",
-                                                "id" .= T.pack "$root$Nactor1$$L0",
-                                                "children" .= A.object []
+                                              [ "type" .= T.pack "KEllipseImpl",
+                                                "children" .= (Seq.empty :: Seq.Seq A.Object),
+                                                "actions" .= (Seq.empty :: Seq.Seq A.Object),
+                                                "styles" .= (Seq.empty :: Seq.Seq A.Object),
+                                                "properties"
+                                                  .= A.object
+                                                    [ "klighd.lsp.rendering.id" .= T.pack "$root$Na$$R0"
+                                                    ]
                                               ]
-                                          ]
+                                          ],
+                                      "type" .= T.pack "node",
+                                      "id" .= T.pack "$root$Na",
+                                      "properties"
+                                        .= A.object
+                                          [ "org.eclipse.elk.nodeLabels.placement"
+                                              .= Seq.fromList
+                                                [ (1 :: Int),
+                                                  (4 :: Int),
+                                                  (6 :: Int)
+                                                ],
+                                            "org.eclipse.elk.nodeSize.constraints"
+                                              .= Seq.fromList
+                                                [ (3 :: Int)
+                                                ],
+                                            "org.eclipse.elk.nodeSize.minimum"
+                                              .= Seq.fromList
+                                                [ (64 :: Int),
+                                                  (64 :: Int)
+                                                ]
+                                          ],
+                                      "children" .= (Seq.empty :: Seq.Seq A.Object)
                                     ]
                                 ]
                           ]
@@ -122,8 +161,12 @@ handlers =
             ms = mkMarkdown "Hello world"
             range = Range pos pos
         responder (Right $ InL rsp),
+      notificationHandler setPreferencesMethod $ \_not -> do
+        pure (),
       notificationHandler diagramAcceptMethod $ \_not -> do
-        sendNotification diagramAcceptMethod (dummyModel)
+        sendNotification diagramAcceptMethod setSynthesis
+        sendNotification diagramAcceptMethod updateOptions
+        sendNotification diagramAcceptMethod requestBounds
         -- sendNotification diagramAcceptMethod (tests)
         pure ()
         -- requestHandler (SMethod_CustomMethod (Proxy @"diagram/accept")) $ \req resp -> do
