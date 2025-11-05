@@ -88,66 +88,12 @@ requestBounds =
                                 [],
                             "children"
                               .= Seq.fromList
-                                [ A.object
-                                    [ "data"
-                                        .= Seq.fromList
-                                          [ A.object
-                                              [ "type" .= T.pack "KEllipseImpl",
-                                                "children" .= (Seq.empty :: Seq.Seq A.Object),
-                                                "actions" .= (Seq.empty :: Seq.Seq A.Object),
-                                                "styles" .= (Seq.empty :: Seq.Seq A.Object),
-                                                "properties"
-                                                  .= A.object
-                                                    [ "klighd.lsp.rendering.id" .= T.pack "$root$Na$$R0"
-                                                    ]
-                                              ]
-                                          ],
-                                      "type" .= T.pack "node",
-                                      "id" .= T.pack "$root$Na",
-                                      "properties"
-                                        .= A.object
-                                          [ "org.eclipse.elk.nodeLabels.placement"
-                                              .= Seq.fromList
-                                                [ (1 :: Int),
-                                                  (4 :: Int),
-                                                  (6 :: Int)
-                                                ],
-                                            "org.eclipse.elk.nodeSize.constraints"
-                                              .= Seq.fromList
-                                                [ (3 :: Int)
-                                                ],
-                                            "org.eclipse.elk.nodeSize.minimum"
-                                              .= Seq.fromList
-                                                [ (64 :: Int),
-                                                  (64 :: Int)
-                                                ]
-                                          ],
-                                      "children"
-                                        .= Seq.fromList
-                                          [ A.object
-                                              [ "type" .= T.pack "label",
-                                                "text" .= T.pack "A",
-                                                "id" .= T.pack "$root$Na$$L0",
-                                                "properties"
-                                                  .= A.object
-                                                    [],
-                                                "data"
-                                                  .= Seq.fromList
-                                                    [ A.object
-                                                        [ "actions" .= (Seq.empty :: Seq.Seq A.Object),
-                                                          "children" .= (Seq.empty :: Seq.Seq A.Object),
-                                                          "properties"
-                                                            .= A.object
-                                                              [],
-                                                          "styles" .= (Seq.empty :: Seq.Seq A.Object),
-                                                          "text" .= T.pack "A",
-                                                          "type" .= T.pack "KTextImpl"
-                                                        ]
-                                                    ],
-                                                "children" .= (Seq.empty :: Seq.Seq A.Object)
-                                              ]
-                                          ]
-                                    ]
+                                [ KNode
+                                    { children =
+                                        [ KLabel {label = "A"}
+                                        ],
+                                      renderings = [KEllipse]
+                                    }
                                 ]
                           ]
                       ]
