@@ -122,7 +122,31 @@ requestBounds =
                                                   (64 :: Int)
                                                 ]
                                           ],
-                                      "children" .= (Seq.empty :: Seq.Seq A.Object)
+                                      "children"
+                                        .= Seq.fromList
+                                          [ A.object
+                                              [ "type" .= T.pack "label",
+                                                "text" .= T.pack "A",
+                                                "id" .= T.pack "$root$Na$$L0",
+                                                "properties"
+                                                  .= A.object
+                                                    [],
+                                                "data"
+                                                  .= Seq.fromList
+                                                    [ A.object
+                                                        [ "actions" .= (Seq.empty :: Seq.Seq A.Object),
+                                                          "children" .= (Seq.empty :: Seq.Seq A.Object),
+                                                          "properties"
+                                                            .= A.object
+                                                              [],
+                                                          "styles" .= (Seq.empty :: Seq.Seq A.Object),
+                                                          "text" .= T.pack "A",
+                                                          "type" .= T.pack "KTextImpl"
+                                                        ]
+                                                    ],
+                                                "children" .= (Seq.empty :: Seq.Seq A.Object)
+                                              ]
+                                          ]
                                     ]
                                 ]
                           ]
