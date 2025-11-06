@@ -7,6 +7,7 @@
 
 module Main (main) where
 
+import ArgumentsLSP
 import qualified Autodocodec as AC
 import qualified Colog.Core as L
 import Control.Concurrent (forkFinally)
@@ -23,6 +24,7 @@ import Language.LSP.Protocol.Message
 import Language.LSP.Protocol.Types
 import Language.LSP.Server
 import Network.Socket
+import Options.Applicative
 import Prettyprinter
 import SKGraphSchema
 import System.IO
@@ -50,8 +52,8 @@ setSynthesis =
           ]
     ]
 
-updateOptions :: A.Value
-updateOptions =
+updateOptions :: FilePath -> A.Value
+updateOptions f =
   A.object
     [ "clientId" .= T.pack "sprotty",
       "action"
@@ -60,12 +62,12 @@ updateOptions =
             "valuedSynthesisOptions" .= (Seq.empty :: Seq.Seq A.Object),
             "layoutOptions" .= (Seq.empty :: Seq.Seq A.Object),
             "actions" .= (Seq.empty :: Seq.Seq A.Object),
-            "modelUri" .= T.pack "file:///home/klara/git/plyghd-ls-demonstrator/empty.kgt"
+            "modelUri" .= T.pack ("file://" ++ f)
           ]
     ]
 
-requestBounds :: A.Value
-requestBounds =
+requestBounds :: FilePath -> A.Value
+requestBounds f =
   A.object
     [ "clientId" .= T.pack "sprotty",
       "action"
@@ -73,7 +75,7 @@ requestBounds =
           [ "kind" .= T.pack "requestBounds",
             "newRoot"
               .= KGraph
-                { gid = T.pack "file:///home/klara/git/plyghd-ls-demonstrator/empty.kgt",
+                { gid = T.pack ("file://" ++ f),
                   properties = [],
                   child =
                     KNode
@@ -131,8 +133,8 @@ requestBounds =
           ]
     ]
 
-handlers :: Handlers (LspM ())
-handlers =
+handlers :: FilePath -> Handlers (LspM ())
+handlers f =
   mconcat
     [ notificationHandler SMethod_Initialized $ \_not -> do
         let params =
@@ -165,8 +167,8 @@ handlers =
         pure (),
       notificationHandler diagramAcceptMethod $ \_not -> do
         sendNotification diagramAcceptMethod setSynthesis
-        sendNotification diagramAcceptMethod updateOptions
-        sendNotification diagramAcceptMethod requestBounds
+        sendNotification diagramAcceptMethod (updateOptions f)
+        sendNotification diagramAcceptMethod (requestBounds f)
         -- sendNotification diagramAcceptMethod (tests)
         pure ()
         -- requestHandler (SMethod_CustomMethod (Proxy @"diagram/accept")) $ \req resp -> do
@@ -179,9 +181,22 @@ runServerC =
     (L.cmap (fmap $ T.pack . show . pretty) (L.cmap show L.logStringStderr))
     (L.cmap (fmap $ T.pack . show . pretty) (L.cmap show L.logStringStderr))
 
+-- Main function - process arguments and call the "real main" run
 main :: IO Int
-main =
-  runTCPServer (Just "127.0.0.1") "5007" lsp
+main = run =<< execParser opts
+  where
+    opts =
+      info
+        (arguments <**> helper)
+        ( fullDesc
+            <> progDesc "Run a ForSyDe LSP"
+            <> header "ForSyDe DevTools"
+        )
+
+-- Main function after arguments have been parsed.
+run :: Arguments -> IO Int
+run (Arguments (Host ip) (TCP p) (InputFile f)) =
+  runTCPServer (Just ip) p lsp
   where
     lsp s = do
       handle <- socketToHandle s ReadWriteMode
@@ -192,7 +207,7 @@ main =
             defaultConfig = (),
             configSection = "demo",
             doInitialize = \env _req -> pure $ Right env,
-            staticHandlers = \_caps -> handlers,
+            staticHandlers = \_caps -> (handlers f),
             interpretHandler = \env -> Iso (runLspT env) liftIO,
             options = defaultOptions
           }

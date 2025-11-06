@@ -1,0 +1,79 @@
+module ArgumentsLSP where
+
+import Options.Applicative
+
+-- Which file to use for input
+data Input
+  = InputFile FilePath
+  | FromClient
+
+-- Host IP(V4) address
+data IP
+  = Host String
+
+-- Port for the server
+data Port
+  = TCP String
+
+-- Arguments, kind of horrible names but used to not shadow usage of ip/port
+-- in main. Contains an ip address, port and file name for synthesis in the
+-- server
+data Arguments = Arguments
+  { -- Files
+    hostIp :: IP,
+    serverPort :: Port,
+    -- Formats
+    input :: Input
+  }
+
+-- Function to create a filepath with file extension
+fileName :: ReadM (FilePath)
+fileName = str >>= returnFile
+  where
+    returnFile s = pure s
+
+-- Handle file input. Default is to get the file from your client, but
+-- allow user to pass a filename directly to server for debugging.
+inputFile :: Parser Input
+inputFile =
+  argument
+    (InputFile <$> str)
+    ( metavar "INPUT"
+        <> value FromClient
+        <> help "Input filename (debug option), if unset get file from client"
+    )
+
+-- IP - String "127.0.0.1" by default, otherwise provide -i or --ip and
+-- the ip address
+ipAddress :: Parser IP
+ipAddress =
+  option
+    (Host <$> str)
+    ( short 'a'
+        <> long "address"
+        <> metavar "IP"
+        <> value (Host "127.0.0.1")
+        <> help "Host IP"
+    )
+
+-- Port - String "5007" by default, otherwise provide -p or --port and
+-- the port
+tcpPort :: Parser Port
+tcpPort =
+  option
+    (TCP <$> str)
+    ( short 'p'
+        <> long "port"
+        <> metavar "PORT"
+        <> value (TCP "5007")
+        <> help "Host TCP Port"
+    )
+
+-- Top level argument parsing function. 3 mandatory arguments but
+-- ip and port have default values.
+arguments :: Parser Arguments
+arguments =
+  Arguments
+    <$> ipAddress
+    <*> tcpPort
+    <*> inputFile
