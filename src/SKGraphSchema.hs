@@ -37,6 +37,11 @@ data GraphElement
         source :: !T.Text,
         target :: !T.Text
       }
+  | KGraph
+      { child :: !GraphElement,
+        properties :: !KProperties,
+        gid :: !T.Text
+      }
 
 data KProperty
   = NodeLabelsPlacement
@@ -168,4 +173,18 @@ instance A.ToJSON GraphElement where
           "sourceId" .= s,
           "targetId" .= t,
           "junctionPoints" .= A.object []
+        ]
+  toJSON
+    KGraph
+      { child = c,
+        properties = p,
+        gid = i
+      } =
+      A.object
+        [ "type" .= T.pack "graph",
+          "revision" .= (0 :: Int),
+          "id" .= i,
+          "properties" .= (M.fromList $ map (\(a, b) -> (T.pack $ show a, Seq.fromList b)) p),
+          "children"
+            .= Seq.fromList [c]
         ]

@@ -72,66 +72,62 @@ requestBounds =
         .= A.object
           [ "kind" .= T.pack "requestBounds",
             "newRoot"
-              .= A.object
-                [ "type" .= T.pack "graph",
-                  "revision" .= (0 :: Int),
-                  "id" .= T.pack "file:///home/klara/git/plyghd-ls-demonstrator/empty.kgt",
-                  "properties" .= (Seq.empty :: Seq.Seq A.Object),
-                  "children"
-                    .= Seq.fromList
-                      [ KNode
-                          { gid = "$root",
-                            renderings = [],
-                            properties = [],
-                            children =
-                              [ KNode
-                                  { children =
-                                      [ KLabel {label = "A", gid = "$root$Na$$L0"},
-                                        KPort
-                                          { children = [],
-                                            renderings = [],
-                                            properties = [],
-                                            gid = "$root$Na$$P0"
-                                          }
-                                      ],
-                                    renderings = [KEllipse],
-                                    properties =
-                                      [ (NodeLabelsPlacement, [1, 4, 6]),
-                                        (NodeSizeConstraints, [3]),
-                                        (NodeSizeMinimum, [64, 64])
-                                      ],
-                                    gid = "$root$Na"
-                                  },
-                                KNode
-                                  { children =
-                                      [ KLabel {label = "B", gid = "$root$Nb$$L0"},
-                                        KPort
-                                          { children = [],
-                                            renderings = [],
-                                            properties = [],
-                                            gid = "$root$Nb$$P0"
-                                          }
-                                      ],
-                                    renderings = [KEllipse],
-                                    properties =
-                                      [ (NodeLabelsPlacement, [1, 4, 6]),
-                                        (NodeSizeConstraints, [3]),
-                                        (NodeSizeMinimum, [64, 64])
-                                      ],
-                                    gid = "$root$Nb"
-                                  },
-                                KEdge
-                                  { children = [],
-                                    renderings = [KPolyline],
-                                    properties = [],
-                                    gid = "$root$Na$$P0$E0",
-                                    source = "$root$Na$$P0",
-                                    target = "$root$Nb$$P0"
-                                  }
-                              ]
-                          }
-                      ]
-                ]
+              .= KGraph
+                { gid = T.pack "file:///home/klara/git/plyghd-ls-demonstrator/empty.kgt",
+                  properties = [],
+                  child =
+                    KNode
+                      { gid = "$root",
+                        renderings = [],
+                        properties = [],
+                        children =
+                          [ KNode
+                              { children =
+                                  [ KLabel {label = "A", gid = "$root$Na$$L0"},
+                                    KPort
+                                      { children = [],
+                                        renderings = [],
+                                        properties = [],
+                                        gid = "$root$Na$$P0"
+                                      }
+                                  ],
+                                renderings = [KEllipse],
+                                properties =
+                                  [ (NodeLabelsPlacement, [1, 4, 6]),
+                                    (NodeSizeConstraints, [3]),
+                                    (NodeSizeMinimum, [64, 64])
+                                  ],
+                                gid = "$root$Na"
+                              },
+                            KNode
+                              { children =
+                                  [ KLabel {label = "B", gid = "$root$Nb$$L0"},
+                                    KPort
+                                      { children = [],
+                                        renderings = [],
+                                        properties = [],
+                                        gid = "$root$Nb$$P0"
+                                      }
+                                  ],
+                                renderings = [KEllipse],
+                                properties =
+                                  [ (NodeLabelsPlacement, [1, 4, 6]),
+                                    (NodeSizeConstraints, [3]),
+                                    (NodeSizeMinimum, [64, 64])
+                                  ],
+                                gid = "$root$Nb"
+                              },
+                            KEdge
+                              { children = [],
+                                renderings = [KPolyline],
+                                properties = [],
+                                gid = "$root$Na$$P0$E0",
+                                source = "$root$Na$$P0",
+                                target = "$root$Nb$$P0"
+                              }
+                          ]
+                      }
+                }
           ]
     ]
 
